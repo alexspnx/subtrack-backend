@@ -45,12 +45,16 @@ clearly fits, use `chore`.** That is the fallback.
 
 Use `!` when the commit can break something outside the commit itself: another deployable, a client, or a deployment. In this solution that includes:
 
-- changing or removing a public HTTP endpoint, request or response shape (`ViewModels`), contract;
+- any API change that the "Versioning and compatibility" section of `docs/api-contract.md` calls breaking:
+  for example removing or renaming an endpoint, or a request/response field in `ViewModels`; changing a
+  field's type or format; changing a route, status code or error `code`; tightening validation; or changing a
+  calculation result or an expectation in `docs/recurrence-examples.json`;
 - changing a message contract (`DTOs`) that other systems depend on;
 - a database schema change (EF migration) that isn't backward compatible;
 - renaming or removing configuration keys, environment variables, or deployment settings.
 
-Everything else is `~`. If you can't tell whether a change is breaking, ask the user rather than guessing.
+API changes that the contract doc lists as additive (a new endpoint, an optional request field, a new response
+field, …) are `~`. Everything else is `~` too. If you can't tell whether a change is breaking, ask the user rather than guessing.
 
 ### The ticket number
 

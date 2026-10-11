@@ -1,0 +1,1477 @@
+{
+  "schemaVersion": 1,
+  "description": "Canonical recurrence, next-renewal, monthly-equivalent, forecast and validation examples for SubTrack. Normative; schema and rules in docs/api-contract.md. Fixed dates only.",
+  "cases": [
+    {
+      "id": "occurrences-monthly-jan31-2027",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: monthly clamps to month end without drift; edge-case row '€10 monthly plan anchored on January 31, 2027'",
+      "description": "Monthly anchor January 31, 2027 clamps to February 28 and returns to March 31.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2027-01-31" }, "from": "2027-01-01", "to": "2027-05-31" },
+      "expected": { "dates": ["2027-01-31", "2027-02-28", "2027-03-31", "2027-04-30", "2027-05-31"] }
+    },
+    {
+      "id": "occurrences-monthly-jan31-2028-leap",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: monthly clamps to month end without drift",
+      "description": "Monthly anchor January 31, 2028 clamps to February 29 in a leap year.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2028-01-31" }, "from": "2028-01-01", "to": "2028-04-30" },
+      "expected": { "dates": ["2028-01-31", "2028-02-29", "2028-03-31", "2028-04-30"] }
+    },
+    {
+      "id": "occurrences-monthly-jan30",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: monthly clamps to month end without drift",
+      "description": "Monthly anchor January 30 clamps only in February and keeps day 30 afterwards.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2027-01-30" }, "from": "2027-01-01", "to": "2027-04-30" },
+      "expected": { "dates": ["2027-01-30", "2027-02-28", "2027-03-30", "2027-04-30"] }
+    },
+    {
+      "id": "occurrences-quarterly-nov30",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: quarterly clamps to month end without drift",
+      "description": "Quarterly anchor November 30 clamps to February 28 and returns to day 30.",
+      "input": { "schedule": { "frequency": "quarterly", "anchorDate": "2026-11-30" }, "from": "2026-11-01", "to": "2027-12-31" },
+      "expected": { "dates": ["2026-11-30", "2027-02-28", "2027-05-30", "2027-08-30", "2027-11-30"] }
+    },
+    {
+      "id": "occurrences-quarterly-aug31",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: quarterly clamps to month end without drift",
+      "description": "Quarterly anchor August 31 gives November 30, February 29 (leap year), May 31, August 31.",
+      "input": { "schedule": { "frequency": "quarterly", "anchorDate": "2027-08-31" }, "from": "2027-08-01", "to": "2028-08-31" },
+      "expected": { "dates": ["2027-08-31", "2027-11-30", "2028-02-29", "2028-05-31", "2028-08-31"] }
+    },
+    {
+      "id": "occurrences-yearly-feb29",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: yearly February 29 clamps to February 28; edge-case row 'Annual anchor February 29, 2028'",
+      "description": "Yearly anchor February 29, 2028 gives February 28 in 2029-2031 and February 29 again in 2032.",
+      "input": { "schedule": { "frequency": "yearly", "anchorDate": "2028-02-29" }, "from": "2028-01-01", "to": "2032-12-31" },
+      "expected": { "dates": ["2028-02-29", "2029-02-28", "2030-02-28", "2031-02-28", "2032-02-29"] }
+    },
+    {
+      "id": "occurrences-weekly-across-dst",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: weekly advances in calendar days, not UTC hours",
+      "description": "Weekly anchor March 21, 2027 crosses the EU DST change of March 28, 2027 without shifting a day.",
+      "input": { "schedule": { "frequency": "weekly", "anchorDate": "2027-03-21" }, "from": "2027-03-21", "to": "2027-04-11" },
+      "expected": { "dates": ["2027-03-21", "2027-03-28", "2027-04-04", "2027-04-11"] }
+    },
+    {
+      "id": "occurrences-every-1-day",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: every N days, N = 1 lower bound",
+      "description": "Every 1 day crosses the end of February 2027.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": 1, "anchorDate": "2027-02-26" },
+        "from": "2027-02-26",
+        "to": "2027-03-02"
+      },
+      "expected": { "dates": ["2027-02-26", "2027-02-27", "2027-02-28", "2027-03-01", "2027-03-02"] }
+    },
+    {
+      "id": "occurrences-every-30-days",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: every N days advances in calendar days from the anchor",
+      "description": "Every 30 days from January 15, 2027 does not follow the day of month.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": 30, "anchorDate": "2027-01-15" },
+        "from": "2027-01-01",
+        "to": "2027-05-31"
+      },
+      "expected": { "dates": ["2027-01-15", "2027-02-14", "2027-03-16", "2027-04-15", "2027-05-15"] }
+    },
+    {
+      "id": "occurrences-every-366-days",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: every N days, N = 366 upper bound",
+      "description": "Every 366 days from March 1, 2027 lands on March 1 across the leap day, then drifts a day per year.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": 366, "anchorDate": "2027-03-01" },
+        "from": "2027-01-01",
+        "to": "2030-12-31"
+      },
+      "expected": { "dates": ["2027-03-01", "2028-03-01", "2029-03-02", "2030-03-03"] }
+    },
+    {
+      "id": "occurrences-past-anchor",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: past anchors calculate directly from the anchor, no drift",
+      "description": "Monthly anchor August 31, 2019 still gives month-end dates in 2027, computed without history.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2019-08-31" }, "from": "2027-02-01", "to": "2027-04-30" },
+      "expected": { "dates": ["2027-02-28", "2027-03-31", "2027-04-30"] }
+    },
+    {
+      "id": "occurrences-anchor-inside-window",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: occurrences never precede the anchor",
+      "description": "Weekly anchor June 9 inside a June window yields nothing before June 9.",
+      "input": { "schedule": { "frequency": "weekly", "anchorDate": "2027-06-09" }, "from": "2027-06-01", "to": "2027-06-30" },
+      "expected": { "dates": ["2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"] }
+    },
+    {
+      "id": "occurrences-anchor-after-window",
+      "kind": "occurrences",
+      "rule": "plan §5 Supported schedules: occurrences never precede the anchor",
+      "description": "An anchor after the window yields no occurrences.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2028-01-01" }, "from": "2027-01-01", "to": "2027-12-31" },
+      "expected": { "dates": [] }
+    },
+    {
+      "id": "occurrences-inclusive-bounds",
+      "kind": "occurrences",
+      "rule": "plan §9 bounded date ranges; api-contract Date ranges: both bounds inclusive",
+      "description": "Occurrences exactly on from and to are included.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" }, "from": "2027-03-10", "to": "2027-05-10" },
+      "expected": { "dates": ["2027-03-10", "2027-04-10", "2027-05-10"] }
+    },
+    {
+      "id": "next-renewal-on-billing-day",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: next renewal is on or after today; today's occurrence stays visible",
+      "description": "On the billing day the next renewal is today.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "now": "2027-03-15T10:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-03-15", "nextRenewal": "2027-03-15" }
+    },
+    {
+      "id": "next-renewal-day-after-billing",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: next renewal is on or after today",
+      "description": "The day after the billing day the next renewal moves to next month.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "now": "2027-03-16T10:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-03-16", "nextRenewal": "2027-04-15" }
+    },
+    {
+      "id": "next-renewal-auckland",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: today is evaluated in the user's time zone",
+      "description": "2027-06-14T20:00Z is June 15 in Auckland, so the June 14 occurrence has passed.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-14" },
+        "now": "2027-06-14T20:00:00Z",
+        "timeZone": "Pacific/Auckland"
+      },
+      "expected": { "today": "2027-06-15", "nextRenewal": "2027-07-14" }
+    },
+    {
+      "id": "next-renewal-los-angeles",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: today is evaluated in the user's time zone",
+      "description": "The same instant is June 14 in Los Angeles, so the next renewal is today.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-14" },
+        "now": "2027-06-14T20:00:00Z",
+        "timeZone": "America/Los_Angeles"
+      },
+      "expected": { "today": "2027-06-14", "nextRenewal": "2027-06-14" }
+    },
+    {
+      "id": "next-renewal-month-end-clamp",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: month-end clamp applies to next renewal",
+      "description": "Anchor January 31: on March 1 the next renewal is March 31.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-31" },
+        "now": "2027-03-01T00:30:00Z",
+        "timeZone": "Etc/UTC"
+      },
+      "expected": { "today": "2027-03-01", "nextRenewal": "2027-03-31" }
+    },
+    {
+      "id": "next-renewal-future-anchor",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: occurrences never precede the anchor",
+      "description": "A future anchor is itself the next renewal.",
+      "input": {
+        "schedule": { "frequency": "yearly", "anchorDate": "2027-09-01" },
+        "now": "2027-06-01T12:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-06-01", "nextRenewal": "2027-09-01" }
+    },
+    {
+      "id": "next-renewal-null-after-cancel",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Lifecycle: cancelled excludes charges on or after the effective date; next renewal is null when none remains",
+      "description": "Cancellation effective June 15 removes the June 15 renewal, so there is no next renewal on June 10.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-06-15" }],
+        "now": "2027-06-10T09:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-06-10", "nextRenewal": null }
+    },
+    {
+      "id": "next-renewal-null-open-pause",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Lifecycle: paused excludes occurrences during the pause; an open pause has no next renewal",
+      "description": "A pause without a resume date excludes every later occurrence.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" },
+        "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": null }],
+        "now": "2027-04-01T09:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-04-01", "nextRenewal": null }
+    },
+    {
+      "id": "next-renewal-during-pause",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Lifecycle: resume requires a selected next billing date",
+      "description": "During a pause that resumes April 25, the next renewal is the resume date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" },
+        "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" }],
+        "now": "2027-03-15T09:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-03-15", "nextRenewal": "2027-04-25" }
+    },
+    {
+      "id": "next-renewal-after-resume",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Lifecycle: resume re-establishes the anchor",
+      "description": "After resuming on April 25 the schedule is re-anchored: May 25, not the original May 10.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" },
+        "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" }],
+        "now": "2027-05-01T09:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-05-01", "nextRenewal": "2027-05-25" }
+    },
+    {
+      "id": "next-renewal-dst-local-midnight",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: today is evaluated in the user's time zone; billing dates are date-only",
+      "description": "21:30 UTC on March 28, 2027 is 00:30 on March 29 in Athens after the DST change (UTC+3); a stale UTC+2 offset would still say March 28.",
+      "input": {
+        "schedule": { "frequency": "weekly", "anchorDate": "2027-03-21" },
+        "now": "2027-03-28T21:30:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-03-29", "nextRenewal": "2027-04-04" }
+    },
+    {
+      "id": "next-renewal-null-after-2099",
+      "kind": "nextRenewal",
+      "rule": "plan §9 bounded date ranges; api-contract Dates: no occurrence after 2099-12-31",
+      "description": "The next yearly occurrence would be 2100-07-01, beyond the supported range, so there is none.",
+      "input": {
+        "schedule": { "frequency": "yearly", "anchorDate": "2098-07-01" },
+        "now": "2099-07-02T12:00:00Z",
+        "timeZone": "Etc/UTC"
+      },
+      "expected": { "today": "2099-07-02", "nextRenewal": null }
+    },
+    {
+      "id": "next-renewal-during-trial",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Lifecycle: trial forecasts paid charges only from the first paid date",
+      "description": "During the trial the next renewal is the first paid date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-05-11" },
+        "trial": { "trialEndDate": "2027-05-10", "firstPaidDate": "2027-05-11" },
+        "now": "2027-05-01T09:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-05-01", "nextRenewal": "2027-05-11" }
+    },
+    {
+      "id": "next-renewal-schedule-edit",
+      "kind": "nextRenewal",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date and replace future projections",
+      "description": "A yearly schedule effective June 1 (anchor July 1) replaces the monthly June 15 renewal.",
+      "input": {
+        "scheduleVersions": [
+          { "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" },
+          { "effectiveDate": "2027-06-01", "frequency": "yearly", "anchorDate": "2027-07-01" }
+        ],
+        "now": "2027-06-10T09:00:00Z",
+        "timeZone": "Europe/Athens"
+      },
+      "expected": { "today": "2027-06-10", "nextRenewal": "2027-07-01" }
+    },
+    {
+      "id": "monthly-equivalent-yearly-120",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: yearly = amount/12; edge-case row '€120 annual plan renewing on December 15'",
+      "description": "€120 yearly is €10.00 a month.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "schedule": { "frequency": "yearly", "anchorDate": "2026-12-15" },
+            "prices": [{ "effectiveDate": "2026-12-15", "price": { "amount": "120.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "10.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-quarterly",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: quarterly = amount/3",
+      "description": "€25.00 quarterly is 8.333… and rounds to €8.33.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "schedule": { "frequency": "quarterly", "anchorDate": "2027-01-10" },
+            "prices": [{ "effectiveDate": "2027-01-10", "price": { "amount": "25.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "8.33", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-weekly",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: weekly = amount*52/12",
+      "description": "€5.00 weekly is 21.666… and rounds to €21.67.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "schedule": { "frequency": "weekly", "anchorDate": "2027-01-04" },
+            "prices": [{ "effectiveDate": "2027-01-04", "price": { "amount": "5.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "21.67", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-every-30-days",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: every N days = amount*365/(N*12)",
+      "description": "€9.99 every 30 days is 10.12875 and rounds to €10.13.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000104",
+            "schedule": { "frequency": "everyNDays", "interval": 30, "anchorDate": "2027-01-15" },
+            "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "10.13", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-jpy-zero-decimals",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: rounding uses the currency's minor units",
+      "description": "¥10000 yearly is 833.33… and rounds to ¥833 (JPY has no minor units).",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000105",
+            "schedule": { "frequency": "yearly", "anchorDate": "2027-04-01" },
+            "prices": [{ "effectiveDate": "2027-04-01", "price": { "amount": "10000", "currency": "JPY" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "833", "currency": "JPY" }] }
+    },
+    {
+      "id": "monthly-equivalent-sum-then-round",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: display rounded values after summing exact contributions",
+      "description": "Two €10.00 quarterly items sum to 6.666… and round to €6.67, not 3.33 + 3.33 = 6.66.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000106",
+            "schedule": { "frequency": "quarterly", "anchorDate": "2027-01-05" },
+            "prices": [{ "effectiveDate": "2027-01-05", "price": { "amount": "10.00", "currency": "EUR" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000107",
+            "schedule": { "frequency": "quarterly", "anchorDate": "2027-02-05" },
+            "prices": [{ "effectiveDate": "2027-02-05", "price": { "amount": "10.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "6.67", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-midpoint-away-from-zero",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: rounding is documented centrally (half away from zero)",
+      "description": "€0.30 yearly is exactly 0.025 and rounds half away from zero to €0.03, not banker's 0.02.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000108",
+            "schedule": { "frequency": "yearly", "anchorDate": "2027-01-01" },
+            "prices": [{ "effectiveDate": "2027-01-01", "price": { "amount": "0.30", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "0.03", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-grouped-by-currency",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: totals are grouped by currency",
+      "description": "EUR and USD items give two totals sorted by currency code.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000109",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [{ "effectiveDate": "2027-01-20", "price": { "amount": "4.99", "currency": "USD" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-00000000010a",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-05" },
+            "prices": [{ "effectiveDate": "2027-01-05", "price": { "amount": "9.99", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "9.99", "currency": "EUR" }, { "amount": "4.99", "currency": "USD" }] }
+    },
+    {
+      "id": "monthly-equivalent-price-in-effect-today",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: monthly equivalent uses the price in effect today",
+      "description": "The €12 price effective June 1 applies on June 1.",
+      "input": {
+        "today": "2027-06-01",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000201",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [
+              { "effectiveDate": "2027-01-20", "price": { "amount": "10.00", "currency": "EUR" } },
+              { "effectiveDate": "2027-06-01", "price": { "amount": "12.00", "currency": "EUR" } }
+            ]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "12.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-trial",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Lifecycle: a trial counts at its recurring paid price",
+      "description": "A trial item with no price in effect yet uses its first price.",
+      "input": {
+        "today": "2027-05-01",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000202",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-05-11" },
+            "prices": [{ "effectiveDate": "2027-05-11", "price": { "amount": "7.99", "currency": "EUR" } }],
+            "trial": { "trialEndDate": "2027-05-10", "firstPaidDate": "2027-05-11" }
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "7.99", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-paused-and-cancelled-zero",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Lifecycle: paused and cancelled items have no scheduled charges; totals grouped by currency",
+      "description": "A paused EUR item contributes nothing but keeps a zero EUR total; the USD item cancelled before today leaves no USD total.",
+      "input": {
+        "today": "2027-04-01",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000203",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" },
+            "prices": [{ "effectiveDate": "2027-01-10", "price": { "amount": "10.00", "currency": "EUR" } }],
+            "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000204",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [{ "effectiveDate": "2027-01-20", "price": { "amount": "4.99", "currency": "USD" } }],
+            "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-03-20" }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "0.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-schedule-version-today",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date; yearly = amount/12",
+      "description": "The yearly schedule version in effect today decides the factor: €120 yearly gives 10.00.",
+      "input": {
+        "today": "2027-06-10",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000205",
+            "scheduleVersions": [
+              { "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" },
+              { "effectiveDate": "2027-06-01", "frequency": "yearly", "anchorDate": "2027-07-01" }
+            ],
+            "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "120.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "10.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-trial-cancelled-on-first-paid-date",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Lifecycle: trial forecasts paid charges only from the first paid date; cancelled excludes charges on or after its date",
+      "description": "A trial cancelled effective its first paid date never charges, so it contributes 0 (no next renewal).",
+      "input": {
+        "today": "2027-05-01",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000209",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-05-11" },
+            "prices": [{ "effectiveDate": "2027-05-11", "price": { "amount": "7.99", "currency": "EUR" } }],
+            "trial": { "trialEndDate": "2027-05-10", "firstPaidDate": "2027-05-11" },
+            "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-05-11" }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "0.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-mixed-factors-sum-then-round",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: weekly = amount*52/12, every N days = amount*365/(N*12); round after summing exact contributions",
+      "description": "Weekly, every 7 days, quarterly and every 13 days at €10.00 sum exactly to 113.5164…, so 113.52 (rounding each item gives 113.51).",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-00000000020a",
+            "schedule": { "frequency": "weekly", "anchorDate": "2027-01-04" },
+            "prices": [{ "effectiveDate": "2027-01-04", "price": { "amount": "10.00", "currency": "EUR" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-00000000020b",
+            "schedule": { "frequency": "everyNDays", "interval": 7, "anchorDate": "2027-01-05" },
+            "prices": [{ "effectiveDate": "2027-01-05", "price": { "amount": "10.00", "currency": "EUR" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-00000000020c",
+            "schedule": { "frequency": "quarterly", "anchorDate": "2027-01-06" },
+            "prices": [{ "effectiveDate": "2027-01-06", "price": { "amount": "10.00", "currency": "EUR" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-00000000020d",
+            "schedule": { "frequency": "everyNDays", "interval": 13, "anchorDate": "2027-01-07" },
+            "prices": [{ "effectiveDate": "2027-01-07", "price": { "amount": "10.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "113.52", "currency": "EUR" }] }
+    },
+    {
+      "id": "monthly-equivalent-kwd-three-decimals",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: rounding uses the currency's minor units",
+      "description": "KWD has 3 minor units: 10.000 quarterly (3.3333…) plus 0.006 yearly (0.0005) gives 3.334.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-00000000020e",
+            "schedule": { "frequency": "quarterly", "anchorDate": "2027-01-10" },
+            "prices": [{ "effectiveDate": "2027-01-10", "price": { "amount": "10.000", "currency": "KWD" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-00000000020f",
+            "schedule": { "frequency": "yearly", "anchorDate": "2027-02-01" },
+            "prices": [{ "effectiveDate": "2027-02-01", "price": { "amount": "0.006", "currency": "KWD" } }]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "3.334", "currency": "KWD" }] }
+    },
+    {
+      "id": "monthly-equivalent-future-anchor-first-price",
+      "kind": "monthlyEquivalent",
+      "rule": "plan §5 Money and totals: monthly equivalent of an item that has not started yet",
+      "description": "An active item first billed September 1 has no price in effect on June 15, so its first price (15.00) applies.",
+      "input": {
+        "today": "2027-06-15",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000210",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-09-01" },
+            "prices": [
+              { "effectiveDate": "2027-09-01", "price": { "amount": "15.00", "currency": "EUR" } },
+              { "effectiveDate": "2027-12-01", "price": { "amount": "18.00", "currency": "EUR" } }
+            ]
+          }
+        ]
+      },
+      "expected": { "totals": [{ "amount": "15.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "forecast-annual-october",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: annual charges only in their billing month; edge-case row '€120 annual plan renewing on December 15'",
+      "description": "€120 yearly renewing December 15 forecasts €0.00 for October.",
+      "input": {
+        "from": "2027-10-01",
+        "to": "2027-10-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "schedule": { "frequency": "yearly", "anchorDate": "2026-12-15" },
+            "prices": [{ "effectiveDate": "2026-12-15", "price": { "amount": "120.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": { "occurrences": [], "totals": [{ "amount": "0.00", "currency": "EUR" }] }
+    },
+    {
+      "id": "forecast-annual-december",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: annual charges only in their billing month; edge-case row '€120 annual plan renewing on December 15'",
+      "description": "€120 yearly renewing December 15 forecasts €120.00 for December.",
+      "input": {
+        "from": "2027-12-01",
+        "to": "2027-12-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "schedule": { "frequency": "yearly", "anchorDate": "2026-12-15" },
+            "prices": [{ "effectiveDate": "2026-12-15", "price": { "amount": "120.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          {
+            "itemId": "00000000-0000-4000-8000-000000000001",
+            "date": "2027-12-15",
+            "price": { "amount": "120.00", "currency": "EUR" }
+          }
+        ],
+        "totals": [{ "amount": "120.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-price-change-may",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: apply the price effective on each date; edge-case row 'Price €10 until May 31, €12 from June 1'",
+      "description": "With €12 effective from June 1, the May occurrence still costs €10.00.",
+      "input": {
+        "from": "2027-05-01",
+        "to": "2027-05-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [
+              { "effectiveDate": "2027-01-20", "price": { "amount": "10.00", "currency": "EUR" } },
+              { "effectiveDate": "2027-06-01", "price": { "amount": "12.00", "currency": "EUR" } }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000002", "date": "2027-05-20", "price": { "amount": "10.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "10.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-price-change-june",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: apply the price effective on each date; edge-case row 'Price €10 until May 31, €12 from June 1'",
+      "description": "With €12 effective from June 1, the June occurrence costs €12.00.",
+      "input": {
+        "from": "2027-06-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [
+              { "effectiveDate": "2027-01-20", "price": { "amount": "10.00", "currency": "EUR" } },
+              { "effectiveDate": "2027-06-01", "price": { "amount": "12.00", "currency": "EUR" } }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000002", "date": "2027-06-20", "price": { "amount": "12.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "12.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-price-effective-on-occurrence-date",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: apply the price effective on each date (effective date <= occurrence date)",
+      "description": "A price effective exactly on June 20 applies to the June 20 occurrence.",
+      "input": {
+        "from": "2027-05-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000003",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [
+              { "effectiveDate": "2027-01-20", "price": { "amount": "10.00", "currency": "EUR" } },
+              { "effectiveDate": "2027-06-20", "price": { "amount": "12.00", "currency": "EUR" } }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000003", "date": "2027-05-20", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000003", "date": "2027-06-20", "price": { "amount": "12.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "22.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-trial-first-paid-date",
+      "kind": "forecast",
+      "rule": "plan §5 Lifecycle: trial forecasts paid charges only from the first paid date; edge-case row 'Free trial ends May 10, first paid charge May 11'",
+      "description": "Trial ends May 10 (the reminder target); the first paid charge is May 11, then monthly.",
+      "input": {
+        "from": "2027-05-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000004",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-05-11" },
+            "prices": [{ "effectiveDate": "2027-05-11", "price": { "amount": "7.99", "currency": "EUR" } }],
+            "trial": { "trialEndDate": "2027-05-10", "firstPaidDate": "2027-05-11" }
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000004", "date": "2027-05-11", "price": { "amount": "7.99", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000004", "date": "2027-06-11", "price": { "amount": "7.99", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "15.98", "currency": "EUR" }],
+        "trialReminderTarget": { "itemId": "00000000-0000-4000-8000-000000000004", "date": "2027-05-10" }
+      }
+    },
+    {
+      "id": "forecast-cancellation-boundary",
+      "kind": "forecast",
+      "rule": "plan §5 Lifecycle: cancelled excludes charges on or after the effective date; edge-case row 'Cancellation effective June 15'",
+      "description": "Both items cancelled effective June 15: the June 14 occurrence is included, the June 15 one excluded.",
+      "input": {
+        "from": "2027-05-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-14" },
+            "prices": [{ "effectiveDate": "2027-01-14", "price": { "amount": "10.00", "currency": "EUR" } }],
+            "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-06-15" }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000006",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+            "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "20.00", "currency": "EUR" } }],
+            "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-06-15" }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000005", "date": "2027-05-14", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000006", "date": "2027-05-15", "price": { "amount": "20.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000005", "date": "2027-06-14", "price": { "amount": "10.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "40.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-pause-and-resume",
+      "kind": "forecast",
+      "rule": "plan §5 Lifecycle: paused excludes the pause interval; resume re-anchors on the selected date",
+      "description": "Paused March 1, resumed April 25: March 10 and April 10 are skipped, then the item bills on the 25th.",
+      "input": {
+        "from": "2027-02-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000007",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" },
+            "prices": [{ "effectiveDate": "2027-01-10", "price": { "amount": "10.00", "currency": "EUR" } }],
+            "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000007", "date": "2027-02-10", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000007", "date": "2027-04-25", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000007", "date": "2027-05-25", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000007", "date": "2027-06-25", "price": { "amount": "10.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "40.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-eur-and-usd",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: totals grouped by currency; edge-case row 'EUR and USD records'",
+      "description": "A EUR and a USD item give two currency totals and no combined total.",
+      "input": {
+        "from": "2027-07-01",
+        "to": "2027-07-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000008",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [{ "effectiveDate": "2027-01-20", "price": { "amount": "15.49", "currency": "USD" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000009",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-05" },
+            "prices": [{ "effectiveDate": "2027-01-05", "price": { "amount": "9.99", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000009", "date": "2027-07-05", "price": { "amount": "9.99", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000008", "date": "2027-07-20", "price": { "amount": "15.49", "currency": "USD" } }
+        ],
+        "totals": [{ "amount": "9.99", "currency": "EUR" }, { "amount": "15.49", "currency": "USD" }]
+      }
+    },
+    {
+      "id": "forecast-schedule-edit",
+      "kind": "forecast",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date, preserve prior history and replace future projections",
+      "description": "Monthly until March, then every 14 days from April 5 (effective April 1); the old April 15 charge is gone.",
+      "input": {
+        "from": "2027-03-01",
+        "to": "2027-05-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000011",
+            "scheduleVersions": [
+              { "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" },
+              { "effectiveDate": "2027-04-01", "frequency": "everyNDays", "interval": 14, "anchorDate": "2027-04-05" }
+            ],
+            "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "10.00", "currency": "EUR" } }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000011", "date": "2027-03-15", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000011", "date": "2027-04-05", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000011", "date": "2027-04-19", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000011", "date": "2027-05-03", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000011", "date": "2027-05-17", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000011", "date": "2027-05-31", "price": { "amount": "10.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "60.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-cancel-during-pause",
+      "kind": "forecast",
+      "rule": "plan §5 Lifecycle: paused excludes the pause interval; cancelled excludes charges on or after the effective date",
+      "description": "A cancel recorded during an open pause: only the February charge before the pause remains.",
+      "input": {
+        "from": "2027-02-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000012",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-10" },
+            "prices": [{ "effectiveDate": "2027-01-10", "price": { "amount": "10.00", "currency": "EUR" } }],
+            "lifecycle": [
+              { "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": null },
+              { "transition": "cancel", "effectiveDate": "2027-04-15" }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000012", "date": "2027-02-10", "price": { "amount": "10.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "10.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-schedule-edit-after-pause",
+      "kind": "forecast",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date; plan §5 Lifecycle: resume re-establishes the anchor",
+      "description": "Paused March 1 to April 25 (re-anchored on the 25th), then a weekly €3.00 schedule from June 1 replaces the June 25 charge.",
+      "input": {
+        "from": "2027-02-01",
+        "to": "2027-06-30",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000013",
+            "scheduleVersions": [
+              { "effectiveDate": "2027-01-10", "frequency": "monthly", "anchorDate": "2027-01-10" },
+              { "effectiveDate": "2027-06-01", "frequency": "weekly", "anchorDate": "2027-06-03" }
+            ],
+            "prices": [
+              { "effectiveDate": "2027-01-10", "price": { "amount": "10.00", "currency": "EUR" } },
+              { "effectiveDate": "2027-06-01", "price": { "amount": "3.00", "currency": "EUR" } }
+            ],
+            "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-02-10", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-04-25", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-05-25", "price": { "amount": "10.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-06-03", "price": { "amount": "3.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-06-10", "price": { "amount": "3.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-06-17", "price": { "amount": "3.00", "currency": "EUR" } },
+          { "itemId": "00000000-0000-4000-8000-000000000013", "date": "2027-06-24", "price": { "amount": "3.00", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "42.00", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "forecast-jpy-total",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: totals keep the currency's minor units",
+      "description": "JPY has no minor units: two 1200 JPY charges total 2400.",
+      "input": {
+        "from": "2027-07-01",
+        "to": "2027-08-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000014",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-25" },
+            "prices": [{ "effectiveDate": "2027-01-25", "price": { "amount": "1200", "currency": "JPY" } }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000014", "date": "2027-07-25", "price": { "amount": "1200", "currency": "JPY" } },
+          { "itemId": "00000000-0000-4000-8000-000000000014", "date": "2027-08-25", "price": { "amount": "1200", "currency": "JPY" } }
+        ],
+        "totals": [{ "amount": "2400", "currency": "JPY" }]
+      }
+    },
+    {
+      "id": "forecast-long-cancelled-currency-dropped",
+      "kind": "forecast",
+      "rule": "plan §5 Money and totals: totals grouped by currency; plan §5 Lifecycle: cancelled excludes charges on or after the effective date",
+      "description": "The only USD item was cancelled on the window start, so USD gets no total; EUR keeps its total.",
+      "input": {
+        "from": "2027-07-01",
+        "to": "2027-07-31",
+        "items": [
+          {
+            "id": "00000000-0000-4000-8000-000000000015",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-05" },
+            "prices": [{ "effectiveDate": "2027-01-05", "price": { "amount": "9.99", "currency": "EUR" } }]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000016",
+            "schedule": { "frequency": "monthly", "anchorDate": "2027-01-20" },
+            "prices": [{ "effectiveDate": "2027-01-20", "price": { "amount": "4.99", "currency": "USD" } }],
+            "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-07-01" }]
+          }
+        ]
+      },
+      "expected": {
+        "occurrences": [
+          { "itemId": "00000000-0000-4000-8000-000000000015", "date": "2027-07-05", "price": { "amount": "9.99", "currency": "EUR" } }
+        ],
+        "totals": [{ "amount": "9.99", "currency": "EUR" }]
+      }
+    },
+    {
+      "id": "invalid-interval-zero",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: N is an integer in 1-366",
+      "description": "Every 0 days is out of range.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": 0, "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.interval", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-interval-367",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: N is an integer in 1-366",
+      "description": "Every 367 days is out of range.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": 367, "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.interval", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-interval-on-monthly",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: interval applies only to every N days",
+      "description": "An interval on a monthly schedule is not allowed.",
+      "input": {
+        "schedule": { "frequency": "monthly", "interval": 2, "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.interval", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-precision-eur",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: validate allowed decimal precision by currency",
+      "description": "EUR has 2 minor units, so 9.999 is rejected, not rounded.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.999", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.amount", "code": "precisionExceeded" }] }
+    },
+    {
+      "id": "invalid-precision-jpy",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: validate allowed decimal precision by currency",
+      "description": "JPY has 0 minor units, so 100.5 is rejected.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "100.5", "currency": "JPY" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.amount", "code": "precisionExceeded" }] }
+    },
+    {
+      "id": "invalid-unknown-currency",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: ISO currency codes",
+      "description": "ZZZ is well-formed but not an active ISO 4217 currency.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "ZZZ" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.currency", "code": "unsupportedCurrency" }] }
+    },
+    {
+      "id": "invalid-metal-currency",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: ISO currency codes (funds and metals excluded)",
+      "description": "XAU (gold) is an ISO 4217 code but metals are not supported.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "1.00", "currency": "XAU" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.currency", "code": "unsupportedCurrency" }] }
+    },
+    {
+      "id": "invalid-amount-trailing-zero",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: decimal-string amounts, precision validated by currency; api-contract Money: digits are counted, not values",
+      "description": "\"9.990\" in EUR has three fraction digits and is rejected, not normalized.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.990", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.amount", "code": "precisionExceeded" }] }
+    },
+    {
+      "id": "invalid-amount-json-number",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: decimal-string amounts, precision validated by currency; plan §9 decimal-string monetary values",
+      "description": "An amount sent as a JSON number is rejected.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": 9.99, "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.amount", "code": "invalidFormat" }] }
+    },
+    {
+      "id": "invalid-currency-lowercase",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: ISO currency codes",
+      "description": "A lowercase currency code is malformed.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "eur" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.currency", "code": "invalidFormat" }] }
+    },
+    {
+      "id": "invalid-amount-negative",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: amounts validated centrally; plan §8 nonnegative prices; api-contract Money: amount >= 0",
+      "description": "A negative amount is out of range.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "-9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.amount", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-amount-13-integer-digits",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: decimal-string amounts, precision validated by currency; api-contract Money: at most 12 integer digits",
+      "description": "An amount with 13 integer digits is out of range.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "1234567890123.00", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.amount", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-interval-missing",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: every N days needs an integer N",
+      "description": "everyNDays without an interval.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.interval", "code": "required" }] }
+    },
+    {
+      "id": "invalid-anchor-1899",
+      "kind": "invalid",
+      "rule": "plan §9 bounded date ranges; api-contract Dates: billing dates within 1900-2099",
+      "description": "Billing dates before 1900-01-01 are out of range.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "1899-12-31" },
+        "prices": [{ "effectiveDate": "1899-12-31", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": {
+        "code": "validationError",
+        "errors": [
+          { "field": "prices[0].effectiveDate", "code": "outOfRange" },
+          { "field": "schedule.anchorDate", "code": "outOfRange" }
+        ]
+      }
+    },
+    {
+      "id": "invalid-currency-fund-che",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: ISO currency codes (funds and metals excluded)",
+      "description": "The WIR euro fund code CHE is not supported.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "CHE" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.currency", "code": "unsupportedCurrency" }] }
+    },
+    {
+      "id": "invalid-precision-skipped-for-unsupported-currency",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: decimal-string amounts, precision validated by currency; api-contract Money: precision is not checked when the currency is unsupported",
+      "description": "Only the currency is reported, because ZZZ has no known minor units.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "1.2345", "currency": "ZZZ" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].price.currency", "code": "unsupportedCurrency" }] }
+    },
+    {
+      "id": "invalid-duplicate-price-date",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: apply the price effective on each date; plan §8 PriceVersion: no overlapping effective ranges",
+      "description": "Two price versions with the same effective date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [
+          { "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } },
+          { "effectiveDate": "2027-01-15", "price": { "amount": "10.99", "currency": "EUR" } }
+        ]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[1].effectiveDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-mixed-price-currencies",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: totals grouped by currency; one currency per item",
+      "description": "A later price version in another currency.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [
+          { "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } },
+          { "effectiveDate": "2027-06-01", "price": { "amount": "10.99", "currency": "USD" } }
+        ]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[1].price.currency", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-first-price-after-anchor",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: every occurrence needs a price in effect",
+      "description": "The first price starts after the first billing date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-02-01", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices[0].effectiveDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-resume-not-after-pause",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: resume requires a selected next billing date",
+      "description": "A resume date on the pause date itself.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-03-01" }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "lifecycle[0].resumeDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-change-after-cancel",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: explicit transitions; cancellation is terminal",
+      "description": "No lifecycle change may follow a cancellation.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [
+          { "transition": "cancel", "effectiveDate": "2027-06-15" },
+          { "transition": "pause", "effectiveDate": "2027-07-01", "resumeDate": null }
+        ]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "lifecycle[1].transition", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-change-during-pause",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: explicit transitions with effective dates",
+      "description": "After a pause that resumes April 25, the next change cannot be before April 25.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [
+          { "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" },
+          { "transition": "cancel", "effectiveDate": "2027-04-01" }
+        ]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "lifecycle[1].effectiveDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-lifecycle-before-first-anchor",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: explicit transitions with effective dates",
+      "description": "A cancellation before the item's first billing date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-01-01" }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "lifecycle[0].effectiveDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-trial-anchor-mismatch",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: trial has an explicitly configured first paid date; edge-case row 'Free trial ends May 10, first paid charge May 11'; plan §8 TrialDetails",
+      "description": "The schedule must be anchored on the trial's first paid date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-05-15" },
+        "prices": [{ "effectiveDate": "2027-05-15", "price": { "amount": "7.99", "currency": "EUR" } }],
+        "trial": { "trialEndDate": "2027-05-10", "firstPaidDate": "2027-05-11" }
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "trial.firstPaidDate", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-trial-end-not-before-first-paid",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: trial is free until its end date, then the first paid date",
+      "description": "The trial must end before the first paid date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-05-11" },
+        "prices": [{ "effectiveDate": "2027-05-11", "price": { "amount": "7.99", "currency": "EUR" } }],
+        "trial": { "trialEndDate": "2027-05-11", "firstPaidDate": "2027-05-11" }
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "trial.trialEndDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-schedule-version-anchor-before-effective",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date",
+      "description": "A schedule version cannot be anchored before its effective date.",
+      "input": {
+        "scheduleVersions": [
+          { "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" },
+          { "effectiveDate": "2027-04-01", "frequency": "monthly", "anchorDate": "2027-03-20" }
+        ],
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "scheduleVersions[1].anchorDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-schedule-version-inside-pause",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date; plan §5 Lifecycle: resume re-establishes the anchor",
+      "description": "A schedule version cannot start inside a pause, where the resume would silently re-anchor it.",
+      "input": {
+        "scheduleVersions": [
+          { "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" },
+          { "effectiveDate": "2027-04-01", "frequency": "monthly", "anchorDate": "2027-04-05" }
+        ],
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [{ "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": "2027-04-25" }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "scheduleVersions[1].effectiveDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-schedule-and-schedule-versions",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date",
+      "description": "schedule and scheduleVersions together: only scheduleVersions is reported, and only schedule is validated.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "scheduleVersions": [{ "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" }],
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "scheduleVersions", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-schedule-missing",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: every item has a billing frequency and anchor date",
+      "description": "Neither schedule nor scheduleVersions.",
+      "input": { "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }] },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule", "code": "required" }] }
+    },
+    {
+      "id": "invalid-prices-empty",
+      "kind": "invalid",
+      "rule": "plan §5 Money and totals: decimal-string amounts, precision validated by currency",
+      "description": "An item needs at least one price version.",
+      "input": { "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" }, "prices": [] },
+      "expected": { "code": "validationError", "errors": [{ "field": "prices", "code": "required" }] }
+    },
+    {
+      "id": "invalid-schedule-versions-empty",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date",
+      "description": "scheduleVersions must not be empty.",
+      "input": {
+        "scheduleVersions": [],
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "scheduleVersions", "code": "required" }] }
+    },
+    {
+      "id": "invalid-first-version-effective-not-anchor",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date",
+      "description": "The first schedule version takes effect on its own anchor date.",
+      "input": {
+        "scheduleVersions": [{ "effectiveDate": "2027-01-10", "frequency": "monthly", "anchorDate": "2027-01-15" }],
+        "prices": [{ "effectiveDate": "2027-01-10", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "scheduleVersions[0].effectiveDate", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-schedule-versions-out-of-order",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: schedule edits take effect on an explicit date",
+      "description": "Schedule versions must be in ascending effective-date order.",
+      "input": {
+        "scheduleVersions": [
+          { "effectiveDate": "2027-01-15", "frequency": "monthly", "anchorDate": "2027-01-15" },
+          { "effectiveDate": "2027-06-01", "frequency": "monthly", "anchorDate": "2027-06-01" },
+          { "effectiveDate": "2027-04-01", "frequency": "monthly", "anchorDate": "2027-04-01" }
+        ],
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "scheduleVersions[2].effectiveDate", "code": "outOfRange" }] }
+    },
+    {
+      "id": "invalid-pause-after-open-pause",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: explicit transitions with effective dates",
+      "description": "Only a cancel may follow an open pause.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [
+          { "transition": "pause", "effectiveDate": "2027-03-01", "resumeDate": null },
+          { "transition": "pause", "effectiveDate": "2027-04-01", "resumeDate": "2027-05-01" }
+        ]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "lifecycle[1].transition", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-cancel-with-resume-date",
+      "kind": "invalid",
+      "rule": "plan §5 Lifecycle: explicit transitions with effective dates",
+      "description": "A cancel has no resume date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "lifecycle": [{ "transition": "cancel", "effectiveDate": "2027-06-15", "resumeDate": "2027-07-01" }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "lifecycle[0].resumeDate", "code": "notAllowed" }] }
+    },
+    {
+      "id": "invalid-owner-id",
+      "kind": "invalid",
+      "rule": "plan §9 requests must never select their own owner ID",
+      "description": "An ownerId property is an unknown field.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }],
+        "ownerId": "0b6f2c1e-8d3a-4f5b-9c7e-2a1d4e6f8b90"
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "ownerId", "code": "unknownField" }] }
+    },
+    {
+      "id": "invalid-impossible-date",
+      "kind": "invalid",
+      "rule": "plan §9 date-only ISO dates",
+      "description": "February 30 is not a date.",
+      "input": {
+        "schedule": { "frequency": "monthly", "anchorDate": "2027-02-30" },
+        "prices": [{ "effectiveDate": "2027-02-01", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.anchorDate", "code": "invalidFormat" }] }
+    },
+    {
+      "id": "invalid-interval-string",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: every N days needs an integer N",
+      "description": "interval sent as a string.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": "30", "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.interval", "code": "invalidFormat" }] }
+    },
+    {
+      "id": "invalid-interval-fraction",
+      "kind": "invalid",
+      "rule": "plan §5 Supported schedules: every N days needs an integer N",
+      "description": "interval 30.5 is not an integer.",
+      "input": {
+        "schedule": { "frequency": "everyNDays", "interval": 30.5, "anchorDate": "2027-01-15" },
+        "prices": [{ "effectiveDate": "2027-01-15", "price": { "amount": "9.99", "currency": "EUR" } }]
+      },
+      "expected": { "code": "validationError", "errors": [{ "field": "schedule.interval", "code": "invalidFormat" }] }
+    }
+  ]
+}

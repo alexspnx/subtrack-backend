@@ -64,6 +64,7 @@ The architecture tests enforce this. See "Adding a new project" below.
 | `tests/UnitTests/` | Unit tests for services. See `tests/UnitTests/CLAUDE.md`. |
 | `tests/ArchitectureTests/` | Tests that enforce this file's structural rules. See `tests/ArchitectureTests/CLAUDE.md`. |
 | `tests/IntegrationTests/` | Reserved for integration tests. Currently empty. |
+| `docs/` | The normative API contract (`docs/api-contract.md`) and the canonical recurrence examples (`docs/recurrence-examples.json`). Not part of the `.slnx`. |
 | `devops/` | Local and deployment assets (`docker-compose.yml` for local PostgreSQL, later Dockerfiles, pipelines). Intentionally **excluded** from the `.slnx` because it holds no buildable projects and shouldn't clutter the IDE solution view. |
 
 ### Dependency direction
@@ -166,6 +167,15 @@ the `.Abstractions` projects) returns a result type from `SubTrack.Common` inste
   unless a service genuinely needs its own; the two-parameter `ServiceResult<TValue, TErrorCode>` exists for
   that, and an enum is the preferred error code type.
 - Callers (other services, controllers) must handle a failed result; they don't assume `Value` is set.
+
+## API contract
+
+This repo owns the API contract for all clients. [`docs/api-contract.md`](docs/api-contract.md) is normative
+for everything on the wire (versioning and compatibility, JSON, IDs, money, dates, errors, concurrency,
+idempotency, paging, ordering) and for the recurrence, monthly-equivalent and forecast calculations.
+[`docs/recurrence-examples.json`](docs/recurrence-examples.json) holds the canonical calculation examples that
+the recurrence engine's tests must pass. API changes follow the contract doc: update it (and the fixture) in
+the same change, and mark a change the doc calls breaking with `!`.
 
 ## Commit messages
 
