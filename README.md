@@ -46,6 +46,15 @@ dotnet tool restore
 dotnet ef migrations add <Name> --project src/Infrastructure/SubTrack.EntityFramework --startup-project src/ApplicationServices/SubTrack.WebAPI
 ```
 
+## API contract
+
+This backend is the contract owner for the web, iOS and Android clients. The wire conventions (versioning and
+compatibility, JSON, IDs, money, dates, errors, concurrency, idempotency, paging, ordering) and the recurrence
+and forecast calculation rules are defined in [`docs/api-contract.md`](docs/api-contract.md). The canonical
+calculation examples, runnable by the backend and the clients, are in
+[`docs/recurrence-examples.json`](docs/recurrence-examples.json). API changes follow the contract doc and
+update it in the same change.
+
 ## Solution structure
 
 ```
@@ -59,6 +68,7 @@ tests/
   UnitTests/             Unit tests for Services
   ArchitectureTests/     Enforce the layering and .slnx rules on every `dotnet test`
   IntegrationTests/      Reserved for integration tests (currently empty)
+docs/                    API contract and canonical recurrence examples; not part of the .slnx
 devops/                  Local and deployment assets; intentionally not part of the .slnx
 ```
 
