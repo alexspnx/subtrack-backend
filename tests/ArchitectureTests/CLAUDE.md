@@ -15,7 +15,7 @@ Current projects:
   - every project is in a known layer folder, in a subfolder named after it;
   - every `ProjectReference` follows the dependency direction in the root `CLAUDE.md` (a `Common` project
     may also reference other `Common` projects);
-  - every unit test project references the `Grains`/`Services` project it is named after;
+  - every unit test project references the `Services` project it is named after;
   - every project on disk is in the `.slnx` under the matching folder, and every `.slnx` entry exists.
 
 ## Rules

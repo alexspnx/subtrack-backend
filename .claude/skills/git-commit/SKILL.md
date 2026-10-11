@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Create a git commit in this repository using the team's commit message format (`~feat: message [TICKET-123]`, with `!` for breaking changes). Use this whenever you are asked to commit changes, write a commit message, or check that a commit message follows the convention. Takes an optional ticket number as its argument.
+description: Create a git commit in this repository using the team's commit message format (`~feat: message [ST-123]`, with `!` for breaking changes). Use this whenever you are asked to commit changes, write a commit message, or check that a commit message follows the convention. Takes an optional ticket number as its argument.
 ---
 
 # git-commit
@@ -14,7 +14,7 @@ change is safe and which ticket it belongs to.
 <impact><scope>: <message> [<TICKET>]
 ```
 
-Example: `~feat: send current statistics to connected clients [IRL-142]`
+Example: `~feat: add subscription endpoints [ST-004]`
 
 | Part | Rule |
 |---|---|
@@ -43,14 +43,10 @@ clearly fits, use `chore`.** That is the fallback.
 
 ### Safe or breaking
 
-Use `!` when the commit can break something outside the commit itself: another deployable, a running cluster,
-a client, or a deployment. In this solution that includes:
+Use `!` when the commit can break something outside the commit itself: another deployable, a client, or a deployment. In this solution that includes:
 
-- changing or removing a public HTTP endpoint, request or response shape (`ViewModels`), or SignalR contract;
-- changing a message contract (`DTOs`) that Kafka/RabbitMQ producers or consumers depend on;
-- changing a grain interface, or a `[GenerateSerializer]` type in a way that breaks serialization (removing
-  or re-numbering an `[Id(n)]`, changing a member's type). Silos and clients from different versions must be
-  able to talk to each other during a rolling deploy;
+- changing or removing a public HTTP endpoint, request or response shape (`ViewModels`), contract;
+- changing a message contract (`DTOs`) that other systems depend on;
 - a database schema change (EF migration) that isn't backward compatible;
 - renaming or removing configuration keys, environment variables, or deployment settings.
 
@@ -62,7 +58,7 @@ Every commit needs a ticket number, because it is how commits are traced back to
 order:
 
 1. The argument passed to this skill, or a ticket the user named in the conversation.
-2. The current branch name, if it contains a ticket key (e.g. `feature/IRL-142-client-statistics` → `IRL-142`).
+2. The current branch name, if it contains a ticket key (e.g. `feature/ST-004-subscription-endpoints` → `ST-004`).
 
 If neither gives one, **ask the user for it**. Never invent a ticket number or leave the brackets empty.
 

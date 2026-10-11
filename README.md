@@ -1,9 +1,9 @@
 # subtrack-backend
 
-A reference/template .NET backend solution. It's not a real product; it's a starting point for spinning up
-a new backend with a consistent, opinionated project layout: ASP.NET Core APIs, Microsoft Orleans grains,
-messaging (Kafka or RabbitMQ), and the usual infrastructure/service/model layering. Copy this structure when
-starting a new project rather than designing a new one from scratch each time.
+The backend API of SubTrack, the contract owner for the web, iOS and Android clients. It is an ASP.NET Core
+WebAPI on .NET 10 with EF Core and PostgreSQL, with no Orleans (workspace ADR 0001). It was bootstrapped from
+the `in-real-life-backend-example` template (commit `f93b5a8`) and keeps that template's opinionated project
+layering.
 
 For the full set of structural, naming, and coding rules (and why they exist), see [`CLAUDE.md`](CLAUDE.md)
 and the `CLAUDE.md` file inside each `src/*` and `tests/*` folder. This README covers the "what"; the rules
@@ -12,6 +12,7 @@ files cover the "why" and "how to extend it".
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download) (pinned via `global.json`)
+- Docker (for the local PostgreSQL in `devops/docker-compose.yml`)
 - Visual Studio 2026 or JetBrains Rider 2025.3+ if you want to open the solution in an IDE. Both support
   `net10.0`, the `.slnx` solution format and Microsoft.Testing.Platform. Visual Studio 2022 cannot target
   .NET 10.
@@ -26,42 +27,51 @@ dotnet format subtrack-backend.slnx --verify-no-changes
 
 Or open `subtrack-backend.slnx` directly in Visual Studio or Rider.
 
-Each deployable in `src/ApplicationServices/` can also be run individually. Start the Orleans silo first,
-because the other hosts connect to it as Orleans clients:
+Run the API against a local PostgreSQL:
 
 ```bash
-dotnet run --project src/ApplicationServices/SubTrack.Silo
+docker compose -f devops/docker-compose.yml up -d
 dotnet run --project src/ApplicationServices/SubTrack.WebAPI
+curl http://localhost:5053/health
+```
+
+`/health` returns `Healthy` (200) when the database is reachable and `Unhealthy` (503) otherwise. The
+development connection string lives in
+`src/ApplicationServices/SubTrack.WebAPI/appsettings.Development.json` and matches the compose file.
+
+Database migrations use the `dotnet-ef` local tool pinned in `.config/dotnet-tools.json`:
+
+```bash
+dotnet tool restore
+dotnet ef migrations add <Name> --project src/Infrastructure/SubTrack.EntityFramework --startup-project src/ApplicationServices/SubTrack.WebAPI
 ```
 
 ## Solution structure
 
 ```
 src/
-  ApplicationServices/   Deployables: Silo (Orleans host), WebAPI, Consumer (Kafka/RabbitMQ worker),
-                         Publisher (Kafka/RabbitMQ producer or SignalR, never both)
-  Common/                Shared building blocks (service results, configuration, enums, Orleans packages)
-  Grains/                Orleans grains and their abstractions
-  Infrastructure/        Database (EF Core), messaging, caching, mapping, etc.
+  ApplicationServices/   Deployables: the WebAPI
+  Common/                Shared building blocks (service results, configuration, enums)
+  Infrastructure/        Database (EF Core + PostgreSQL), mapping, etc.
   Models/                DomainModels, DTOs, ViewModels, Entities (EF)
   Services/              DomainServices and ClientServices (+ their Abstractions projects)
 tests/
-  UnitTests/             Unit tests for Services and Grains
+  UnitTests/             Unit tests for Services
   ArchitectureTests/     Enforce the layering and .slnx rules on every `dotnet test`
   IntegrationTests/      Reserved for integration tests (currently empty)
-devops/                  Deployment/CI assets; intentionally not part of the .slnx
+devops/                  Local and deployment assets; intentionally not part of the .slnx
 ```
 
 Dependencies flow one direction only:
 
 ```
-Common -> Models -> Infrastructure/*.Abstractions -> Grains/Services -> ApplicationServices
+Common -> Models -> Infrastructure/*.Abstractions -> Services -> ApplicationServices
 ```
 
 `ApplicationServices` is the composition root (the deployables); nothing depends on it. `Common` sits at the
-base and depends on nothing else in the solution except other `Common` projects. Grains and Services only know each other through their
-`.Abstractions` projects. See [`CLAUDE.md`](CLAUDE.md) for the full rules on what each layer may and may not
-reference.
+base and depends on nothing else in the solution except other `Common` projects. Services only know each
+other through their `.Abstractions` projects. See [`CLAUDE.md`](CLAUDE.md) for the full rules on what each
+layer may and may not reference.
 
 Shared build settings live in `Directory.Build.props`, and NuGet versions are managed centrally in
 `Directory.Packages.props`. `global.json` pins the .NET 10 SDK band and opts `dotnet test` into
@@ -70,25 +80,18 @@ Microsoft.Testing.Platform. A `.csproj` in this solution therefore only ever con
 
 ### Current projects, by folder
 
-This is what's already in the template as a worked example; a real project built from this template will add
-to (or, for `Consumer`/`Publisher`, choose Kafka **or** RabbitMQ for) these:
-
 | Folder | Projects |
 |---|---|
-| `src/ApplicationServices/` | `SubTrack.Silo`, `SubTrack.WebAPI`, `SubTrack.Consumer`, `SubTrack.Publisher` |
-| `src/Common/` | `SubTrack.Common`, `SubTrack.Common.Configuration`, `SubTrack.Common.Enums`, `SubTrack.Common.Orleans` |
-| `src/Grains/` | `SubTrack.Grains`, `SubTrack.Grains.Abstractions` |
-| `src/Infrastructure/` | `SubTrack.EntityFramework` (EF Core), `SubTrack.Mapper` (object-to-object mapping) |
+| `src/ApplicationServices/` | `SubTrack.WebAPI` |
+| `src/Common/` | `SubTrack.Common`, `SubTrack.Common.Configuration`, `SubTrack.Common.Enums` |
+| `src/Infrastructure/` | `SubTrack.EntityFramework` (`SubTrackDbContext`, PostgreSQL via Npgsql), `SubTrack.Mapper` (object-to-object mapping) |
 | `src/Models/` | `SubTrack.DomainModels`, `SubTrack.DTOs`, `SubTrack.ViewModels`, `SubTrack.Entities` |
 | `src/Services/` | `SubTrack.DomainServices` (+ `.Abstractions`), `SubTrack.ClientServices` (+ `.Abstractions`) |
-| `tests/UnitTests/` | `SubTrack.DomainServices.UnitTests`, `SubTrack.ClientServices.UnitTests`, `SubTrack.Grains.UnitTests` |
+| `tests/UnitTests/` | `SubTrack.DomainServices.UnitTests`, `SubTrack.ClientServices.UnitTests` |
 | `tests/ArchitectureTests/` | `SubTrack.ArchitectureTests` |
 
-`SubTrack.Common.Orleans` is the one place in the solution that references Orleans packages directly;
-every other project that needs Orleans (grain base types, client/server hosting, or the serializer code
-generator) takes a `ProjectReference` on it instead. Kafka, RabbitMQ, Redis and similar concerns aren't
-wired up yet — each gets its own `SubTrack.<Concern>` project under `src/Infrastructure/` when a project
-built from this template needs it.
+The architecture tests still define a reserved `Grains` layer with no projects (ADR 0001). Further technical
+concerns each get their own `SubTrack.<Concern>` project under `src/Infrastructure/` when they are needed.
 
 ## Naming conventions
 
@@ -97,15 +100,10 @@ Names should describe the role a type plays, not just the noun it acts on:
 - **Services** get a `Service` suffix that names the responsibility, not an agent noun — prefer
   `ContractReplicationService` over `ContractReplicator`. Interfaces live in the matching `*.Abstractions`
   project, prefixed `I` (`IContractReplicationService`).
-- **Grains** always get a `Grain` suffix (`MatchGrain`, `PlayerGrain`); grain interfaces (in
-  `Grains.Abstractions`) are prefixed `I` and keep the `Grain` suffix (`IMatchGrain`).
-- **Hosted/background services** get a `HostedService` suffix (e.g. `GrainInitializationHostedService`).
-- **Message handlers** (Kafka/RabbitMQ) are the one deliberate exception to the "no agent nouns" rule: they
-  get a `Handler` suffix and are named after the message they handle (`MatchCreatedHandler` handles
-  `MatchCreatedDto`). They live in the `Consumer` host.
+- **Hosted/background services** get a `HostedService` suffix (e.g. `RecurrenceRefreshHostedService`).
 - **DTOs** get a `Dto` suffix, **view models** get a `ViewModel` suffix, and **EF entities** get an `Entity`
-  suffix (`MatchEntity`). **Domain models** are named after the business entity with no suffix (`Match`,
-  `Player`).
+  suffix (`SubscriptionEntity`). **Domain models** are named after the business entity with no suffix
+  (`Subscription`, `Category`).
 
 ## Service result pattern
 
@@ -144,11 +142,11 @@ including the ones the architecture tests can't (type naming, where a type belon
 ## Commit messages
 
 Every commit subject follows `<~|!><scope>: <message> [<TICKET>]`, e.g.
-`~feat: send current statistics to connected clients [IRL-142]`:
+`~feat: add subscription endpoints [ST-004]`:
 
 - `~` for a safe commit, `!` for a breaking one;
 - scope is one of `feat`, `fix`, `chore`, `refactor`, `test`, falling back to `chore`;
-- the ticket number in square brackets always comes last, and is never invented.
+- the ticket number in square brackets (`ST-xxx`) always comes last, and is never invented.
 
 ## Working with Claude Code
 
@@ -159,6 +157,6 @@ This repo is set up for [Claude Code](https://claude.com/claude-code):
 - `.claude/agents/structure-guardian.md`: an agent that audits new/changed files against those rules,
   including the ones the architecture tests can't check (type naming, type placement).
 - `.claude/skills/git-commit/SKILL.md`: a skill that commits using the team's message format
-  (`~feat: message [TICKET-123]`, with `!` marking breaking changes).
+  (`~feat: message [ST-123]`, with `!` marking breaking changes).
 - `.claude/skills/sync-docs/SKILL.md`: a skill that keeps the `CLAUDE.md` files, this README and the
   architecture tests in sync after a structural change.

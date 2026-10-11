@@ -27,9 +27,7 @@ Business/domain logic, split by direction:
   DI, not reference the concrete `Services` project directly. Only the `ApplicationServices` hosts reference
   concrete services, to register them.
 - A `Services` project may reference `Common`, `Models`, `Infrastructure`, and `.Abstractions` projects. It
-  must not reference a concrete `Services` or `Grains` project, or anything in `ApplicationServices`.
-- `DomainServices` may call grains: inject `IGrainFactory` and use the grain interfaces from
-  `Grains.Abstractions`. That works both inside the silo and in any host configured as an Orleans client.
+  must not reference a concrete `Services` project, or anything in `ApplicationServices`.
 - `DomainServices` may use `ClientServices.Abstractions` to reach external systems. `ClientServices` should not
   depend on `DomainServices.Abstractions`: outbound clients don't call back into the domain.
 - A `Services.Abstractions` project may reference `Common` and `Models` only.

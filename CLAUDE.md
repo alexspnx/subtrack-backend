@@ -4,11 +4,11 @@ This file guides Claude Code (and any other contributor, human or AI) when worki
 
 ## What this is
 
-`subtrack-backend` is a reference/template .NET backend solution. It exists to show a preferred
-project layout for a backend built with ASP.NET Core, Microsoft Orleans, and messaging/data infrastructure
-(Kafka, RabbitMQ, Redis, EF Core, etc.), so that new projects can be bootstrapped from the same structure
-instead of reinventing it each time. Treat the structure and rules below as load-bearing: they are the point
-of this repository.
+`subtrack-backend` is the backend API of SubTrack and the contract owner for all clients (web, iOS, Android).
+It is an ASP.NET Core WebAPI on .NET 10 with EF Core and PostgreSQL, with no Orleans (see ADR 0001 in the
+workspace root, `docs/decisions/`). It was bootstrapped from the `in-real-life-backend-example` template
+(commit `f93b5a8`) and keeps that template's project layout. Treat the structure and rules below as
+load-bearing.
 
 ## Commands
 
@@ -22,7 +22,18 @@ Before finishing any task that touches `src/`, `tests/`, a `.csproj`, or the `.s
 tests and make sure both pass. The architecture tests (`tests/ArchitectureTests`) fail when a project
 reference breaks the layering, or when a project is missing from the `.slnx` or listed under the wrong folder.
 
-To run the system locally, start `SubTrack.Silo` first. The other hosts connect to it as Orleans clients.
+To run the API locally, start PostgreSQL, then the WebAPI:
+
+```bash
+docker compose -f devops/docker-compose.yml up -d
+dotnet run --project src/ApplicationServices/SubTrack.WebAPI
+curl http://localhost:5053/health        # Healthy when the database is reachable, 503 otherwise
+```
+
+The development connection string (`ConnectionStrings:SubTrack`) is in
+`src/ApplicationServices/SubTrack.WebAPI/appsettings.Development.json` and matches `devops/docker-compose.yml`.
+EF Core migrations use the `dotnet-ef` local tool pinned in `.config/dotnet-tools.json`
+(`dotnet tool restore`, then `dotnet ef ... --project src/Infrastructure/SubTrack.EntityFramework --startup-project src/ApplicationServices/SubTrack.WebAPI`).
 
 ## Build configuration
 
@@ -45,16 +56,15 @@ The architecture tests enforce this. See "Adding a new project" below.
 
 | Folder | Purpose |
 |---|---|
-| `src/ApplicationServices/` | The deployables: the only executable/hostable entry points (the Web API, the message Consumer and Publisher hosts, the Orleans Silo host). See `src/ApplicationServices/CLAUDE.md`. |
+| `src/ApplicationServices/` | The deployables: the only executable/hostable entry points (currently the Web API). See `src/ApplicationServices/CLAUDE.md`. |
 | `src/Common/` | Cross-cutting building blocks that depend on nothing but each other, referenced by everything. See `src/Common/CLAUDE.md`. |
-| `src/Grains/` | Microsoft Orleans grains and their interfaces. See `src/Grains/CLAUDE.md`. |
-| `src/Infrastructure/` | Database, Kafka, Redis, RabbitMQ, and other technical/integration concerns. See `src/Infrastructure/CLAUDE.md`. |
+| `src/Infrastructure/` | Database (EF Core/PostgreSQL) and other technical/integration concerns. See `src/Infrastructure/CLAUDE.md`. |
 | `src/Models/` | All data-shape types: domain models, DTOs, view models, EF entities. See `src/Models/CLAUDE.md`. |
 | `src/Services/` | Business/domain logic and outbound client services. See `src/Services/CLAUDE.md`. |
-| `tests/UnitTests/` | Unit tests for services and grains. See `tests/UnitTests/CLAUDE.md`. |
+| `tests/UnitTests/` | Unit tests for services. See `tests/UnitTests/CLAUDE.md`. |
 | `tests/ArchitectureTests/` | Tests that enforce this file's structural rules. See `tests/ArchitectureTests/CLAUDE.md`. |
 | `tests/IntegrationTests/` | Reserved for integration tests. Currently empty. |
-| `devops/` | Deployment/CI assets (Dockerfiles, manifests, pipelines). Intentionally **excluded** from the `.slnx` because it holds no buildable projects and shouldn't clutter the IDE solution view. |
+| `devops/` | Local and deployment assets (`docker-compose.yml` for local PostgreSQL, later Dockerfiles, pipelines). Intentionally **excluded** from the `.slnx` because it holds no buildable projects and shouldn't clutter the IDE solution view. |
 
 ### Dependency direction
 
@@ -64,15 +74,15 @@ Dependencies only flow downward through these layers. A layer must never referen
 Common                                   (may reference only other Common projects)
   -> Models                              (may reference Common)
     -> Infrastructure, *.Abstractions    (may reference Common, Models)
-      -> Grains, Services                (may reference Common, Models, Infrastructure, any *.Abstractions)
+      -> Services                        (may reference Common, Models, Infrastructure, any *.Abstractions)
         -> ApplicationServices           (composition root: may reference anything below)
 ```
 
-- `*.Abstractions` means `Grains.Abstractions`, `DomainServices.Abstractions` and `ClientServices.Abstractions`.
-  They are a layer of their own because they sit below their implementations.
-- Grains and Services never reference each other's **concrete** projects, only the `.Abstractions`. So a
-  grain calls a service through `IXxxService`, and a domain service calls a grain through `IGrainFactory` and
-  the grain interface in `Grains.Abstractions`.
+- `*.Abstractions` means `DomainServices.Abstractions` and `ClientServices.Abstractions`. They are a layer of
+  their own because they sit below their implementations.
+- Services never reference each other's **concrete** projects, only the `.Abstractions`.
+- The architecture tests still define a `Grains` layer. It is reserved and has no projects (ADR 0001); don't
+  remove it from the tests.
 - Nothing in `src/` may reference `ApplicationServices/`. Nothing in `src/` may reference a test project.
 - `tests/UnitTests` projects reference the project they test plus `Common`, `Models` and `*.Abstractions` as
   needed.
@@ -114,7 +124,7 @@ too because they're easy to miss when skimming code:
   ```
   never `if (condition) DoSomething();`. The same applies to `else`, `for`, `foreach`, `while`.
 - **Summaries only on interface members and model public properties.** Every member of an interface
-  definition (`I*` types, including grain and service interfaces) must have a `///` summary explaining what
+  definition (`I*` types, including service interfaces) must have a `///` summary explaining what
   it does. Public properties on model types (`DomainModels`, DTOs, view models, entities) get the same
   treatment when their purpose isn't obvious from the name. Public methods on concrete implementations do
   **not** get summaries or comments: the interface's summary is the documentation, and the implementation
@@ -133,15 +143,10 @@ Names should describe the role a type plays, not just the noun it acts on. In pa
   Avoid `ContractReplicator`, `MessagePublisher`. Prefer `ContractReplicationService`,
   `MessagePublishingService`. Interfaces live in the matching `*.Abstractions` project and are prefixed
   `I` (`IContractReplicationService`).
-- **Grains** always get a `Grain` suffix: `MatchGrain`, `PlayerGrain`. Grain interfaces (in
-  `Grains.Abstractions`) are prefixed `I` and also keep the `Grain` suffix: `IMatchGrain`.
-- **Hosted/background services** get a `HostedService` suffix (e.g. `GrainInitializationHostedService`).
-- **Message handlers** (Kafka/RabbitMQ) are the one deliberate exception to the "no agent nouns" rule. They
-  get a `Handler` suffix and are named after the message they handle: `MatchCreatedHandler` handles
-  `MatchCreatedDto`. They live in the `Consumer` host (see `src/ApplicationServices/CLAUDE.md`).
+- **Hosted/background services** get a `HostedService` suffix (e.g. `RecurrenceRefreshHostedService`).
 - **DTOs** get a `Dto` suffix. **View models** get a `ViewModel` suffix. **EF entities** in `Entities` get an
-  `Entity` suffix (`MatchEntity`). Domain models in `DomainModels` are named after the business entity with
-  no suffix (`Match`, `Player`).
+  `Entity` suffix (`SubscriptionEntity`). Domain models in `DomainModels` are named after the business entity with
+  no suffix (`Subscription`, `Category`).
 
 ## Service result pattern
 
@@ -160,12 +165,12 @@ the `.Abstractions` projects) returns a result type from `SubTrack.Common` inste
 - Add a new value to `ServiceErrorCode` (`SubTrack.Common.Enums`) rather than a custom error code type,
   unless a service genuinely needs its own; the two-parameter `ServiceResult<TValue, TErrorCode>` exists for
   that, and an enum is the preferred error code type.
-- Callers (grains, other services, hosts) must handle a failed result; they don't assume `Value` is set.
+- Callers (other services, controllers) must handle a failed result; they don't assume `Value` is set.
 
 ## Commit messages
 
 Every commit subject follows `<~|!><scope>: <message> [<TICKET>]`, e.g.
-`~feat: send current statistics to connected clients [IRL-142]`:
+`~feat: add subscription endpoints [ST-004]`:
 
 - `~` for a safe commit, `!` for a breaking one;
 - scope is one of `feat`, `fix`, `chore`, `refactor`, `test`, with `chore` as the fallback;

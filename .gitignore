@@ -72,7 +72,6 @@ ClientBin/
 *.jfm
 *.pfx
 *.publishsettings
-orleans.codegen.cs
 
 # Publish
 *.[Pp]ublish.xml
