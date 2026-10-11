@@ -25,9 +25,9 @@ public class VoidResultServiceResult<TErrorCode>
     }
 
     /// <summary>
-    /// Create a new successful result.
+    /// Create a new failed result with the given error code.
     /// </summary>
-    /// <param name="value">The value of the result</param>
+    /// <param name="value">The code of the error</param>
     public VoidResultServiceResult(TErrorCode value)
     {
         Error = new ServiceResultError<TErrorCode>(value);
