@@ -10,8 +10,11 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddSubTrackDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString(ConnectionStringName)
-            ?? throw new InvalidOperationException($"Connection string '{ConnectionStringName}' is not configured.");
+        var connectionString = configuration.GetConnectionString(ConnectionStringName);
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException($"Connection string '{ConnectionStringName}' is not configured.");
+        }
 
         return services.AddDbContext<SubTrackDbContext>(options => options.UseNpgsql(connectionString));
     }

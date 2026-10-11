@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: subtrack
       POSTGRES_PASSWORD: subtrack_dev
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - subtrack-postgres-data:/var/lib/postgresql/data
     healthcheck:
