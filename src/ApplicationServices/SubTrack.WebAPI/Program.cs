@@ -6,12 +6,6 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Orleans client: controllers and domain services call grains through IClusterClient / IGrainFactory.
-builder.UseOrleansClient(client =>
-{
-    client.UseLocalhostClustering();
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

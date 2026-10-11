@@ -5,8 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Common/SubTrack.Common.Orleans/SubTrack.Common.Orleans.csproj" />
-    <ProjectReference Include="../../Grains/SubTrack.Grains.Abstractions/SubTrack.Grains.Abstractions.csproj" />
     <ProjectReference Include="../../Models/SubTrack.ViewModels/SubTrack.ViewModels.csproj" />
     <ProjectReference Include="../../Infrastructure/SubTrack.Mapper/SubTrack.Mapper.csproj" />
     <ProjectReference Include="../../Services/SubTrack.DomainServices/SubTrack.DomainServices.csproj" />

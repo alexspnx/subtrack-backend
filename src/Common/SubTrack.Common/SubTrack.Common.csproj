@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SubTrack.Common.Enums\SubTrack.Common.Enums.csproj" />
-    <ProjectReference Include="..\SubTrack.Common.Orleans\SubTrack.Common.Orleans.csproj" />
   </ItemGroup>
 
 </Project>

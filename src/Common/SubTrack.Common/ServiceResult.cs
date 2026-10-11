@@ -7,13 +7,11 @@ namespace SubTrack.Common;
 /// </summary>
 /// <typeparam name="TValue">The type of the value of the result</typeparam>
 /// <typeparam name="TErrorCode">The type of the error code of the result. It is preferred to be an enumeration.</typeparam>
-[GenerateSerializer]
 public class ServiceResult<TValue, TErrorCode> : VoidResultServiceResult<TErrorCode>
 {
     /// <summary>
     /// The actual value of the result when successful.
     /// </summary>
-    [Id(0)]
     public TValue? Value { get; set; }
 
     /// <summary>
@@ -57,7 +55,6 @@ public class ServiceResult<TValue, TErrorCode> : VoidResultServiceResult<TErrorC
     }
 }
 
-[GenerateSerializer]
 public class ServiceResult<TValue> : ServiceResult<TValue, ServiceErrorCode>
 {
     /// <summary>

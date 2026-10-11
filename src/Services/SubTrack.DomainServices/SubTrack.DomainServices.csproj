@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="../SubTrack.DomainServices.Abstractions/SubTrack.DomainServices.Abstractions.csproj" />
     <ProjectReference Include="../SubTrack.ClientServices.Abstractions/SubTrack.ClientServices.Abstractions.csproj" />
-    <ProjectReference Include="../../Grains/SubTrack.Grains.Abstractions/SubTrack.Grains.Abstractions.csproj" />
     <ProjectReference Include="../../Infrastructure/SubTrack.EntityFramework/SubTrack.EntityFramework.csproj" />
     <ProjectReference Include="../../Infrastructure/SubTrack.Mapper/SubTrack.Mapper.csproj" />
   </ItemGroup>

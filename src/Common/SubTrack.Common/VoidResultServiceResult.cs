@@ -2,13 +2,11 @@ using SubTrack.Common.Enums;
 
 namespace SubTrack.Common;
 
-[GenerateSerializer]
 public class VoidResultServiceResult<TErrorCode>
 {
     /// <summary>
     /// The error details when the result has failed.
     /// </summary>
-    [Id(0)]
     public ServiceResultError<TErrorCode>? Error { get; set; }
 
     /// <summary>
@@ -70,7 +68,6 @@ public class VoidResultServiceResult<TErrorCode>
     }
 }
 
-[GenerateSerializer]
 public class VoidResultServiceResult : VoidResultServiceResult<ServiceErrorCode>
 {
     /// <summary>

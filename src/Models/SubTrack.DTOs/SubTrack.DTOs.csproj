@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Common/SubTrack.Common.Enums/SubTrack.Common.Enums.csproj" />
-    <ProjectReference Include="../../Common/SubTrack.Common.Orleans/SubTrack.Common.Orleans.csproj" />
   </ItemGroup>
 
 </Project>
