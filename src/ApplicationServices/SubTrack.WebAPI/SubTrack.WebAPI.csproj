@@ -2,9 +2,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Infrastructure/SubTrack.EntityFramework/SubTrack.EntityFramework.csproj" />
     <ProjectReference Include="../../Models/SubTrack.ViewModels/SubTrack.ViewModels.csproj" />
     <ProjectReference Include="../../Infrastructure/SubTrack.Mapper/SubTrack.Mapper.csproj" />
     <ProjectReference Include="../../Services/SubTrack.DomainServices/SubTrack.DomainServices.csproj" />
