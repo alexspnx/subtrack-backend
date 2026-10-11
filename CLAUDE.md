@@ -189,6 +189,8 @@ Every commit subject follows `<~|!><scope>: <message> [<TICKET>]`, e.g.
 Use the `git-commit` skill (`.claude/skills/git-commit/SKILL.md`) to commit. It covers how to choose each part
 and what counts as breaking in this solution.
 
+Commit directly on `main`: no feature branches, no PRs. Only `main` is pushed, and only when asked.
+
 ## Keeping docs in sync
 
 If a change adds/removes/renames a project, introduces a new top-level folder, or changes one of the rules

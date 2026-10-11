@@ -62,7 +62,7 @@ Every commit needs a ticket number, because it is how commits are traced back to
 order:
 
 1. The argument passed to this skill, or a ticket the user named in the conversation.
-2. The current branch name, if it contains a ticket key (e.g. `feature/ST-004-subscription-endpoints` → `ST-004`).
+2. The spec or story being worked on (e.g. `spec-st-004-…` → `ST-004`).
 
 If neither gives one, **ask the user for it**. Never invent a ticket number or leave the brackets empty.
 
@@ -72,8 +72,8 @@ If neither gives one, **ask the user for it**. Never invent a ticket number or l
    already staged). Make sure nothing unintended is included, such as secrets, `.env` files, local settings,
    or build output. If the working tree holds unrelated changes, ask the user which ones belong in this
    commit.
-2. **Check the branch.** If you're on `main` or `master`, ask the user whether to create a branch first
-   instead of committing there directly.
+2. **Check the branch.** Commit directly on `main`; this repo uses no feature branches or PRs. If you're on
+   any other branch, ask the user before committing. Push only `main`, and only when the user asks.
 3. **Verify the build.** If the commit touches `src/`, `tests/`, a `.csproj`, a `.props` file, or the
    `.slnx`, run `dotnet build subtrack-backend.slnx` and
    `dotnet test --solution subtrack-backend.slnx` first. Don't commit if either fails; report

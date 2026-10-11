@@ -21,8 +21,8 @@ Read, in order:
 If the caller told you which files/projects to check, check those. Otherwise, in a git repository, collect:
 
 - uncommitted changes: `git status --porcelain` (this includes untracked files);
-- committed work on the current branch: `git diff --name-only main...HEAD`. If `main` doesn't exist, try
-  `master`; if neither exists, rely on `git status` alone.
+- committed but unpushed work: `git diff --name-only origin/main...HEAD` (work is committed directly on
+  `main`). If `origin/main` doesn't exist, rely on `git status` alone.
 
 Don't audit the entire repository from scratch unless explicitly asked to.
 
