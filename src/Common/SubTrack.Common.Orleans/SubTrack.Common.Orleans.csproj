@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The one place in the solution that references Orleans packages. Every other project that needs Orleans
+    (grain base types, client/server hosting, or serializer code generation) references this project instead
+    of the packages directly. CodeGenerator is referenced without PrivateAssets="all" on purpose: Orleans only
+    generates serializers in the assembly that declares the [GenerateSerializer] type, so the generator must
+    flow transitively to whichever project (e.g. DomainModels, DTOs) references this one.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Orleans.Client" />
+    <PackageReference Include="Microsoft.Orleans.CodeGenerator" />
+    <PackageReference Include="Microsoft.Orleans.Core.Abstractions" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" />
+    <PackageReference Include="Microsoft.Orleans.Serialization" />
+    <PackageReference Include="Microsoft.Orleans.Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Orleans" />
+  </ItemGroup>
+
+</Project>

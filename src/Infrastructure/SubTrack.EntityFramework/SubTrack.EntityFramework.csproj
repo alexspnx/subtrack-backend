@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../Common/SubTrack.Common.Configuration/SubTrack.Common.Configuration.csproj" />
+    <ProjectReference Include="../../Models/SubTrack.Entities/SubTrack.Entities.csproj" />
+  </ItemGroup>
+
+</Project>

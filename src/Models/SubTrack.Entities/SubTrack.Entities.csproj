@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../Common/SubTrack.Common.Enums/SubTrack.Common.Enums.csproj" />
+  </ItemGroup>
+
+</Project>

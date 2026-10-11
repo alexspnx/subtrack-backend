@@ -1,0 +1,6 @@
+@SubTrack.WebAPI_HostAddress = http://localhost:5053
+
+GET {{SubTrack.WebAPI_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###

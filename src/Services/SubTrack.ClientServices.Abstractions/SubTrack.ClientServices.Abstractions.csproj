@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../Models/SubTrack.DTOs/SubTrack.DTOs.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../SubTrack.ClientServices.Abstractions/SubTrack.ClientServices.Abstractions.csproj" />
+    <ProjectReference Include="../../Common/SubTrack.Common.Configuration/SubTrack.Common.Configuration.csproj" />
+    <ProjectReference Include="../../Infrastructure/SubTrack.Mapper/SubTrack.Mapper.csproj" />
+  </ItemGroup>
+
+</Project>

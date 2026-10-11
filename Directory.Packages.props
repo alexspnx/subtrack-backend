@@ -1,0 +1,22 @@
+<Project>
+  <!-- Central package management: versions live here, project files use <PackageReference Include="..." /> without a Version. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup Label="ASP.NET Core / hosting">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Orleans.Core.Abstractions" Version="10.3.1" />
+  </ItemGroup>
+  <ItemGroup Label="Orleans">
+    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.3.1" />
+  </ItemGroup>
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.2" />
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+  </ItemGroup>
+</Project>

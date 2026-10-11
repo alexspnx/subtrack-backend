@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../SubTrack.Grains.Abstractions/SubTrack.Grains.Abstractions.csproj" />
+    <ProjectReference Include="../../Common/SubTrack.Common.Orleans/SubTrack.Common.Orleans.csproj" />
+    <ProjectReference Include="../../Services/SubTrack.DomainServices.Abstractions/SubTrack.DomainServices.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

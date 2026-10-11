@@ -1,0 +1,18 @@
+# Normalize line endings: LF in the repository, native line endings in the working tree.
+* text=auto
+
+# Files executed inside Linux containers/CI must keep LF even on Windows checkouts.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+
+# Windows-only scripts keep CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary files.
+*.png binary
+*.jpg binary
+*.ico binary
+*.pfx binary
+*.snk binary

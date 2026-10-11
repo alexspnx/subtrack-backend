@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="../../Common/SubTrack.Common.Orleans/SubTrack.Common.Orleans.csproj" />
+    <ProjectReference Include="../../Grains/SubTrack.Grains.Abstractions/SubTrack.Grains.Abstractions.csproj" />
+    <ProjectReference Include="../../Models/SubTrack.DTOs/SubTrack.DTOs.csproj" />
+  </ItemGroup>
+
+</Project>
