@@ -10,20 +10,12 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/ApplicationServices/">
-    <Project Path="src/ApplicationServices/SubTrack.Consumer/SubTrack.Consumer.csproj" Id="0ae664da-d2a5-40b4-87cc-804e2d40491c" />
-    <Project Path="src/ApplicationServices/SubTrack.Publisher/SubTrack.Publisher.csproj" Id="7f6d4ab7-55bb-434b-a055-e0ef23efd738" />
-    <Project Path="src/ApplicationServices/SubTrack.Silo/SubTrack.Silo.csproj" />
     <Project Path="src/ApplicationServices/SubTrack.WebAPI/SubTrack.WebAPI.csproj" />
   </Folder>
   <Folder Name="/src/Common/">
     <Project Path="src/Common/SubTrack.Common.Configuration/SubTrack.Common.Configuration.csproj" Id="c7fbf4a2-af50-46bd-af86-dc51e47a1d54" />
     <Project Path="src/Common/SubTrack.Common.Enums/SubTrack.Common.Enums.csproj" Id="36d392b9-f802-4bd0-8d89-4d5454ff5f83" />
-    <Project Path="src/Common/SubTrack.Common.Orleans/SubTrack.Common.Orleans.csproj" Id="fe7ffab6-7d16-47d8-a534-211b7e6246b1" />
     <Project Path="src/Common/SubTrack.Common/SubTrack.Common.csproj" Id="14dcca59-936c-4e6b-bf8d-0e7b0c3d2b55" />
-  </Folder>
-  <Folder Name="/src/Grains/">
-    <Project Path="src/Grains/SubTrack.Grains.Abstractions/SubTrack.Grains.Abstractions.csproj" Id="ccb909cf-bcd0-4e7a-9001-618072485c88" />
-    <Project Path="src/Grains/SubTrack.Grains/SubTrack.Grains.csproj" Id="9b3c9656-41b2-4ca3-9c46-a2e7dd13ba6a" />
   </Folder>
   <Folder Name="/src/Infrastructure/">
     <Project Path="src/Infrastructure/SubTrack.EntityFramework/SubTrack.EntityFramework.csproj" Id="2604cc9f-75c0-4968-af7f-8f12bbb14927" />
@@ -49,6 +41,5 @@
   <Folder Name="/tests/UnitTests/">
     <Project Path="tests/UnitTests/SubTrack.ClientServices.UnitTests/SubTrack.ClientServices.UnitTests.csproj" Id="c28e116d-a814-4ff8-8683-bc3f258ec62e" />
     <Project Path="tests/UnitTests/SubTrack.DomainServices.UnitTests/SubTrack.DomainServices.UnitTests.csproj" Id="23305689-acdd-4e30-8108-9059332857bd" />
-    <Project Path="tests/UnitTests/SubTrack.Grains.UnitTests/SubTrack.Grains.UnitTests.csproj" />
   </Folder>
 </Solution>

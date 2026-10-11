@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="../../Common/SubTrack.Common.Orleans/SubTrack.Common.Orleans.csproj" />
-    <ProjectReference Include="../../Models/SubTrack.DomainModels/SubTrack.DomainModels.csproj" />
-    <ProjectReference Include="../../Models/SubTrack.DTOs/SubTrack.DTOs.csproj" />
-  </ItemGroup>
-
-</Project>
